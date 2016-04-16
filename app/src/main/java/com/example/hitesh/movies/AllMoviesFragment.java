@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -85,17 +84,30 @@ public class AllMoviesFragment extends Fragment {
                 getActivity(),
                 movieList, // list of data to show
                 R.layout.movie_info, // the layout of a single item
-                new String[] { MovieAdapter.MOVIE_TITLE, MovieAdapter.MOVIE_POSTER },
-                new int[] { R.id.movie_title_textview, R.id.movie_poster });
+                new String[]{Constants.Movie.MOVIE_TITLE, Constants.Movie.MOVIE_POSTER},
+                new int[]{R.id.movie_title_textview, R.id.movie_poster});
 
         moviesGridView.setAdapter(movieAdapter);
 
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String movieTitle = (String) ((TextView) view.findViewById(R.id.movie_title_textview)).getText();
+                HashMap<String, String> itemClicked = movieList.get(position);
+                String movieTitle = itemClicked.get(Constants.Movie.MOVIE_TITLE);
+                String moviePoster = itemClicked.get(Constants.Movie.MOVIE_POSTER);
+                String movieReleaseDate = itemClicked.get(Constants.Movie.MOVIE_RELEASE_DATE);
+                String movieRating = itemClicked.get(Constants.Movie.MOVIE_RATING);
+                String movieTotalVotes = itemClicked.get(Constants.Movie.MOVIE_TOTAL_VOTES);
+                String movieOverview = itemClicked.get(Constants.Movie.MOVIE_OVERVIEW);
+
                 Intent detailsIntent = new Intent(getActivity(), MovieDetailsActivity.class);
-                detailsIntent.putExtra("movie_title", movieTitle);
+                detailsIntent.putExtra(Constants.Movie.MOVIE_TITLE, movieTitle);
+                detailsIntent.putExtra(Constants.Movie.MOVIE_POSTER, moviePoster);
+                detailsIntent.putExtra(Constants.Movie.MOVIE_RELEASE_DATE, movieReleaseDate);
+                detailsIntent.putExtra(Constants.Movie.MOVIE_RATING, movieRating);
+                detailsIntent.putExtra(Constants.Movie.MOVIE_TOTAL_VOTES, movieTotalVotes);
+                detailsIntent.putExtra(Constants.Movie.MOVIE_OVERVIEW, movieOverview);
+
                 startActivity(detailsIntent);
             }
         });
@@ -153,9 +165,9 @@ public class AllMoviesFragment extends Fragment {
             String sortOrder = null;
             if (params.length != 0) {
                 if (params[0].equals(getString(R.string.movie_sort_default))) {
-                    sortOrder = ApiHelper.SORT_BY_POPULARITY;
+                    sortOrder = Constants.Api.SORT_BY_POPULARITY;
                 } else {
-                    sortOrder = ApiHelper.SORT_BY_VOTES;
+                    sortOrder = Constants.Api.SORT_BY_VOTES;
                 }
 
             }
@@ -165,9 +177,9 @@ public class AllMoviesFragment extends Fragment {
             BufferedReader reader = null;
 
             try {
-                Uri moviesUri = Uri.parse(ApiHelper.API_BASE_URL).buildUpon()
-                        .appendQueryParameter(ApiHelper.SORT_KEY, sortOrder)
-                        .appendQueryParameter(ApiHelper.API_KEY_QUERY, ApiHelper.API_KEY)
+                Uri moviesUri = Uri.parse(Constants.Api.API_BASE_URL).buildUpon()
+                        .appendQueryParameter(Constants.Api.SORT_KEY, sortOrder)
+                        .appendQueryParameter(Constants.Api.API_KEY_QUERY, Constants.Api.API_KEY)
                         .build();
                 URL url = new URL(moviesUri.toString());
 
@@ -207,7 +219,7 @@ public class AllMoviesFragment extends Fragment {
                     try {
                         reader.close();
                     } catch (IOException e) {
-                        Log.e(LOG_TAG, "Error: "+ e.getMessage());
+                        Log.e(LOG_TAG, "Error: " + e.getMessage());
 
                     }
                 }
@@ -225,7 +237,8 @@ public class AllMoviesFragment extends Fragment {
 
             movieList = fetchMovieListFromJSON(moviesJsonString);
             Log.d(LOG_TAG, "movielist updated");
-            if(dialog.isShowing()){
+
+            if (dialog.isShowing()) {
                 dialog.dismiss();
             }
 
@@ -233,15 +246,14 @@ public class AllMoviesFragment extends Fragment {
                     getActivity(),
                     movieList, // list of data to show
                     R.layout.movie_info, // the layout of a single item
-                    new String[] { MovieAdapter.MOVIE_TITLE, MovieAdapter.MOVIE_POSTER },
-                    new int[] { R.id.movie_title_textview, R.id.movie_poster }
+                    new String[]{Constants.Movie.MOVIE_TITLE, Constants.Movie.MOVIE_POSTER},
+                    new int[]{R.id.movie_title_textview, R.id.movie_poster}
             );
 
             moviesGridView.setAdapter(movieAdapter);
         }
 
         private ArrayList<HashMap<String, String>> fetchMovieListFromJSON(String jsonString) {
-            ArrayList<String> movieList = new ArrayList<>();
             ArrayList<HashMap<String, String>> kvPair = new ArrayList<>();
 
             try {
@@ -249,11 +261,31 @@ public class AllMoviesFragment extends Fragment {
                 int movieListLength = jsonMovieList.length();
                 Log.d(LOG_TAG, movieListLength + " items fetched");
 
-                for (int i=0; i<movieListLength; i++) {
+                for (int i = 0; i < movieListLength; i++) {
                     JSONObject currentMovie = jsonMovieList.getJSONObject(i);
                     HashMap<String, String> item = new HashMap<>();
-                    item.put(MovieAdapter.MOVIE_TITLE, currentMovie.getString(ApiHelper.ORIGINAL_TITLE_KEY));
-                    item.put(MovieAdapter.MOVIE_POSTER, currentMovie.getString(ApiHelper.POSTER_PATH_KEY));
+                    //get the movie data from the JSON response
+                    item.put(Constants.Movie.MOVIE_ID,
+                            currentMovie.getString(Constants.Api.ID_KEY));
+
+                    item.put(Constants.Movie.MOVIE_TITLE,
+                            currentMovie.getString(Constants.Api.ORIGINAL_TITLE_KEY));
+
+                    item.put(Constants.Movie.MOVIE_POSTER,
+                            currentMovie.getString(Constants.Api.POSTER_PATH_KEY));
+
+                    item.put(Constants.Movie.MOVIE_RATING,
+                            currentMovie.getString(Constants.Api.VOTE_AVERAGE_KEY));
+
+                    item.put(Constants.Movie.MOVIE_TOTAL_VOTES,
+                            currentMovie.getString(Constants.Api.TOTAL_VOTES_KEY));
+
+                    item.put(Constants.Movie.MOVIE_RELEASE_DATE,
+                            releaseDateFormatter(currentMovie.getString(Constants.Api.RELEASE_DATE_KEY)));
+
+                    item.put(Constants.Movie.MOVIE_OVERVIEW,
+                            currentMovie.getString(Constants.Api.OVERVIEW_KEY));
+
                     kvPair.add(item);
                 }
 
@@ -262,16 +294,20 @@ public class AllMoviesFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            if (!movieList.isEmpty()) {
-                Log.d(LOG_TAG, "movieList is not empty");
-                for (String item : movieList) {
-                    Log.d(LOG_TAG, item);
-                }
-            } else {
-                Log.d(LOG_TAG, "movieList is empty");
-            }
-
             return kvPair;
         }
+
+        private String releaseDateFormatter(String unformattedDate) {
+            StringBuilder sb = new StringBuilder();
+            String[] explodedDate = unformattedDate.split("-");
+
+            sb.append(explodedDate[2])                  //day of month
+                    .append("/").append(explodedDate[1])    //month
+                    .append("/").append(explodedDate[0]);   //year
+
+            //Log.d(LOG_TAG, sb.toString());
+            return sb.toString();
+        }
+
     }
 }
