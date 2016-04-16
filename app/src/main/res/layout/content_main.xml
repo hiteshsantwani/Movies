@@ -13,8 +13,16 @@
     tools:showIn="@layout/activity_main"
     tools:context="com.example.hitesh.movies.MainActivity">
 
-    <TextView
-        android:text="Hello World!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <GridView
+        android:id="@+id/movies_gridview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:horizontalSpacing="10dp"
+        android:numColumns="2"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp">
+
+    </GridView>
+
 </RelativeLayout>
