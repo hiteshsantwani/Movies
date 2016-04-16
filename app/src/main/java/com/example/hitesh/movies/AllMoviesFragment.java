@@ -3,6 +3,7 @@ package com.example.hitesh.movies;
 /**
  * Created by hitesh on 16-04-2016.
  */
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -137,12 +138,14 @@ public class AllMoviesFragment extends Fragment {
     class FetchMoviesTask extends AsyncTask<String, Void, String> {
         public final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
         Toast errorInConnection;
+        ProgressDialog dialog;
 
         @Override
         protected void onPreExecute() {
             errorInConnection = Toast.makeText(getActivity(),
                     "Can't connect to the server",
                     Toast.LENGTH_LONG);
+            dialog = ProgressDialog.show(getActivity(), "Please wait", "Updating the movies");
         }
 
         @Override
@@ -222,6 +225,9 @@ public class AllMoviesFragment extends Fragment {
 
             movieList = fetchMovieListFromJSON(moviesJsonString);
             Log.d(LOG_TAG, "movielist updated");
+            if(dialog.isShowing()){
+                dialog.dismiss();
+            }
 
             movieAdapter = new MovieAdapter(
                     getActivity(),
