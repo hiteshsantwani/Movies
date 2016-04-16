@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.hitesh.movies.apiclient.ApiHelper;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -52,11 +51,12 @@ public class MovieAdapter extends SimpleAdapter {
 
         Uri imageUri = Uri.parse(ApiHelper.IMAGE_BASE_URL).buildUpon()
                 .appendPath(ApiHelper.IMAGE_DEFAULT_SIZE)
-                .appendPath(moviePoster).build();
+                .appendPath(moviePoster.substring(1))
+                .build();
 
         Log.d("MovieAdapter", imageUri.toString());
 
-        Picasso.with(appContext).load(imageUri.toString()).into(posterImageView);
+        Picasso.with(appContext).load(imageUri).into(posterImageView);
 
         return convertView;
     }

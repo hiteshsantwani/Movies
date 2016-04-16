@@ -1,4 +1,4 @@
-package com.example.hitesh.movies.apiclient;
+package com.example.hitesh.movies;
 
 /**
  * Created by hitesh on 16-04-2016.
