@@ -28,7 +28,7 @@
         android:name="com.example.hitesh.movies.AllMoviesFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout="@layout/content_main" />
+        tools:layout="@layout/Fragment_main" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
