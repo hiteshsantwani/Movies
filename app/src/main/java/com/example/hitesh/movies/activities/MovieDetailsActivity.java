@@ -1,10 +1,12 @@
-package com.example.hitesh.movies;
+package com.example.hitesh.movies.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.example.hitesh.movies.R;
 
 /**
  * Created by hitesh on 16-04-2016.

@@ -1,4 +1,4 @@
-package com.example.hitesh.movies;
+package com.example.hitesh.movies.fragments;
 
 /**
  * Created by hitesh on 16-04-2016.
@@ -35,10 +35,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.example.hitesh.movies.Constants;
+import com.example.hitesh.movies.R;
+import com.example.hitesh.movies.Utility;
+import com.example.hitesh.movies.activities.MovieDetailsActivity;
+import com.example.hitesh.movies.adapters.MovieAdapter;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class AllMoviesFragment extends Fragment {
     public static final String LOG_TAG = AllMoviesFragment.class.getSimpleName();
     ArrayList<HashMap<String, String>> movieList;
@@ -56,9 +58,9 @@ public class AllMoviesFragment extends Fragment {
 
         moviesGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
 
+        movieList = new ArrayList<>();
         /*
         // For testing only!
-        movieList = new ArrayList<>();
         String[] moviesTitleList = {
                 "Interstellar",
                 "Jurasic World",
@@ -73,19 +75,18 @@ public class AllMoviesFragment extends Fragment {
         };
         for (int i=0; i<4; i++) {
             HashMap<String, String> tmpMovie = new HashMap<>();
-            tmpMovie.put(MovieAdapter.MOVIE_TITLE, moviesTitleList[i]);
-            tmpMovie.put(MovieAdapter.MOVIE_POSTER, moviesPosterList[i]);
+            tmpMovie.put(Constants.Movie.MOVIE_TITLE, moviesTitleList[i]);
+            tmpMovie.put(Constants.Movie.MOVIE_POSTER, moviesPosterList[i]);
             movieList.add(tmpMovie);
         }
         //*/
 
-        movieList = new ArrayList<>();
         movieAdapter = new MovieAdapter(
                 getActivity(),
                 movieList, // list of data to show
-                R.layout.movie_info, // the layout of a single item
-                new String[]{Constants.Movie.MOVIE_TITLE, Constants.Movie.MOVIE_POSTER},
-                new int[]{R.id.movie_title_textview, R.id.movie_poster});
+                R.layout.movie_poster, // the layout of a single item
+                new String[]{Constants.Movie.MOVIE_POSTER},
+                new int[]{R.id.movie_poster});
 
         moviesGridView.setAdapter(movieAdapter);
 
@@ -143,6 +144,8 @@ public class AllMoviesFragment extends Fragment {
                 getString(R.string.movie_sort_key),
                 getString(R.string.movie_sort_default));
 
+        Log.d(LOG_TAG, sortOrder);
+
         FetchMoviesTask task = new FetchMoviesTask();
         task.execute(sortOrder);
     }
@@ -162,14 +165,16 @@ public class AllMoviesFragment extends Fragment {
 
         @Override
         protected String doInBackground(String... params) {
-            String sortOrder = null;
-            if (params.length != 0) {
-                if (params[0].equals(getString(R.string.movie_sort_default))) {
-                    sortOrder = Constants.Api.SORT_BY_POPULARITY;
-                } else {
-                    sortOrder = Constants.Api.SORT_BY_VOTES;
-                }
+            if (params.length == 0) {
+                Log.e(LOG_TAG, "Why is this called without params?!");
+                return null;
+            }
 
+            String sortOrder;
+            if (params[0].equals(getString(R.string.movie_sort_default))) {
+                sortOrder = Constants.Api.SORT_BY_POPULARITY;
+            } else {
+                sortOrder = Constants.Api.SORT_BY_VOTES;
             }
 
             HttpURLConnection urlConnection = null;
@@ -181,6 +186,9 @@ public class AllMoviesFragment extends Fragment {
                         .appendQueryParameter(Constants.Api.SORT_KEY, sortOrder)
                         .appendQueryParameter(Constants.Api.API_KEY_QUERY, Constants.Api.API_KEY)
                         .build();
+
+                Log.d(LOG_TAG, moviesUri.toString());
+
                 URL url = new URL(moviesUri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -196,12 +204,11 @@ public class AllMoviesFragment extends Fragment {
                 }
 
                 if (sb.length() == 0) {
-                    Log.d(LOG_TAG, "length of message 0");
+                    Log.d(LOG_TAG, "No response from the server");
                     return null;
                 }
 
                 moviesJSONString = sb.toString();
-                //fetchMovieListFromJSON(moviesJSONString);
 
             } catch (MalformedURLException e) {
                 Log.e(LOG_TAG, "Error: " + e.getMessage());
@@ -236,7 +243,7 @@ public class AllMoviesFragment extends Fragment {
             }
 
             movieList = fetchMovieListFromJSON(moviesJsonString);
-            Log.d(LOG_TAG, "movielist updated");
+            Log.d(LOG_TAG, "movieList updated");
 
             if (dialog.isShowing()) {
                 dialog.dismiss();
@@ -245,9 +252,9 @@ public class AllMoviesFragment extends Fragment {
             movieAdapter = new MovieAdapter(
                     getActivity(),
                     movieList, // list of data to show
-                    R.layout.movie_info, // the layout of a single item
-                    new String[]{Constants.Movie.MOVIE_TITLE, Constants.Movie.MOVIE_POSTER},
-                    new int[]{R.id.movie_title_textview, R.id.movie_poster}
+                    R.layout.movie_poster, // the layout of a single item
+                    new String[]{Constants.Movie.MOVIE_POSTER},
+                    new int[]{R.id.movie_poster}
             );
 
             moviesGridView.setAdapter(movieAdapter);
@@ -264,6 +271,7 @@ public class AllMoviesFragment extends Fragment {
                 for (int i = 0; i < movieListLength; i++) {
                     JSONObject currentMovie = jsonMovieList.getJSONObject(i);
                     HashMap<String, String> item = new HashMap<>();
+
                     //get the movie data from the JSON response
                     item.put(Constants.Movie.MOVIE_ID,
                             currentMovie.getString(Constants.Api.ID_KEY));
@@ -281,7 +289,8 @@ public class AllMoviesFragment extends Fragment {
                             currentMovie.getString(Constants.Api.TOTAL_VOTES_KEY));
 
                     item.put(Constants.Movie.MOVIE_RELEASE_DATE,
-                            releaseDateFormatter(currentMovie.getString(Constants.Api.RELEASE_DATE_KEY)));
+                            //releaseDateFormatter(currentMovie.getString(Constants.Api.RELEASE_DATE_KEY)));
+                            Utility.releaseDateFormatter(currentMovie.getString(Constants.Api.RELEASE_DATE_KEY)));
 
                     item.put(Constants.Movie.MOVIE_OVERVIEW,
                             currentMovie.getString(Constants.Api.OVERVIEW_KEY));

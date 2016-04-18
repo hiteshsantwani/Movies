@@ -1,10 +1,12 @@
-package com.example.hitesh.movies;
+package com.example.hitesh.movies.activities;
 
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+
+import com.example.hitesh.movies.R;
 
 /**
  * Created by hitesh on 16-04-2016.

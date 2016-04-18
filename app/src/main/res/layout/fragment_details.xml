@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
-    tools:context="com.example.hitesh.movies.MovieDetailsFragment">
+    tools:context=".fragments.MovieDetailsFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
 
         <ImageView
             android:id="@+id/details_movie_poster"
-            android:layout_width="wrap_content"
+            android:layout_width="160dp"
             android:layout_height="wrap_content" />
 
         <LinearLayout

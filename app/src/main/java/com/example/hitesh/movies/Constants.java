@@ -3,8 +3,11 @@ package com.example.hitesh.movies;
 /**
  * Created by hitesh on 16-04-2016.
  */
-public class Constants {
+public final class Constants {
 
+    /**
+     * Key strings for building URIs to fetch data from the cloud service
+     */
     public class Api {
         public static final String API_KEY = "6e7da6d84d9ec6215cffd1c3e8924c87";
         public static final String API_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
@@ -19,15 +22,17 @@ public class Constants {
         public static final String VOTE_AVERAGE_KEY = "vote_average";
         public static final String TOTAL_VOTES_KEY = "vote_count";
         public static final String OVERVIEW_KEY = "overview";
-        public static final String SORT_KEY = "overview";
+        public static final String SORT_KEY = "sortby";
         public static final String API_KEY_QUERY = "api_key";
 
         public static final String SORT_BY_POPULARITY = "popularity.desc";
         public static final String SORT_BY_VOTES = "vote_average.desc";
-
-        protected Api() {}
     }
 
+    /**
+     * String constants for storing movie data in a HashMap
+     * (will be removed later)
+     */
     public class Movie {
         public static final String MOVIE_ID = "movie_id";
         public static final String MOVIE_TITLE = "movie_title";
@@ -38,10 +43,12 @@ public class Constants {
         public static final String MOVIE_OVERVIEW = "movie_overview";
     }
 
+    /**
+     * String constants for formatting text output
+     */
     public class StringFormats {
-        public static final String ratings = "%s/10 (%s) votes";
+        public static final String ratings = "%s/10 (%s votes)";
         public static final String releaseDate = "Released on %s";
     }
 
 }
-

@@ -1,4 +1,4 @@
-package com.example.hitesh.movies;
+package com.example.hitesh.movies.adapters;
 
 /**
  * Created by hitesh on 16-04-2016.
@@ -11,8 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
+import com.example.hitesh.movies.Constants;
+import com.example.hitesh.movies.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -34,28 +35,26 @@ public class MovieAdapter extends SimpleAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.movie_info, null);
+            convertView = inflater.inflate(R.layout.movie_poster, null);
         }
 
         HashMap<String, String> data = (HashMap<String, String>) getItem(position);
 
-        TextView titleTextView = (TextView) convertView.findViewById(R.id.movie_title_textview);
         ImageView posterImageView = (ImageView) convertView.findViewById(R.id.movie_poster);
 
-        String movieTitle = data.get(Constants.Movie.MOVIE_TITLE);
         String moviePoster = data.get(Constants.Movie.MOVIE_POSTER);
 
-        titleTextView.setText(movieTitle);
-
         Uri imageUri = Uri.parse(Constants.Api.IMAGE_BASE_URL).buildUpon()
-                .appendPath(Constants.Api.IMAGE_DEFAULT_SIZE)
+                .appendPath(Constants.Api.IMAGE_SIZE_MEDIUM)
                 .appendPath(moviePoster.substring(1))
                 .build();
 
-        Log.d("MovieAdapter", imageUri.toString());
+        //Log.d("MovieAdapter", imageUri.toString());
+          Log.d("MovieAdapter", imageUri.toString());
 
-        Picasso.with(appContext).load(imageUri).into(posterImageView);
-
+        Picasso.with(appContext).load(imageUri)
+                                .placeholder(R.drawable.loading)
+                                .into(posterImageView);
         return convertView;
     }
 }
