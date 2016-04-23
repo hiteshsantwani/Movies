@@ -24,9 +24,10 @@ import android.util.Log;
 
 import com.example.hitesh.movies.Config;
 import com.example.hitesh.movies.R;
-import com.example.hitesh.movies.TmdbService;
+import com.example.hitesh.movies.api.TmdbService;
 import com.example.hitesh.movies.Utility;
 import com.example.hitesh.movies.activities.MainActivity;
+import com.example.hitesh.movies.api.AllMoviesResponse;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -93,10 +94,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 .setEndpoint(Config.API_BASE_URL)
                 .build();
         TmdbService tmdbService = restAdapter.create(TmdbService.class);
-        tmdbService.getTopMovies(sortOrder, new Callback<Config.ApiResponse>() {
+        tmdbService.getTopMovies(sortOrder, new Callback<AllMoviesResponse>() {
             @Override
-            public void success(Config.ApiResponse apiResponse, Response response) {
-                Utility.storeMovieList(getContext(), apiResponse.getMovieList());
+            public void success(AllMoviesResponse allMovies, Response response) {
+                Utility.storeMovieList(getContext(), allMovies.getMovieList());
                 sendNotification();
             }
 

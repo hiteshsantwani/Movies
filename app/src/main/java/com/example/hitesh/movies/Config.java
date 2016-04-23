@@ -4,7 +4,6 @@ package com.example.hitesh.movies;
  * Created by hitesh on 23-04-2016.
  */
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 public final class Config {
@@ -13,15 +12,4 @@ public final class Config {
     public static final String API_BASE_URL = "http://api.themoviedb.org/3";
     public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 
-    /**
-     * The response from the server is a JSON object that has an array at the key "results"
-     */
-    public class ApiResponse {
-        @SerializedName("results")
-        List<Movie> movieList;
-
-        public List<Movie> getMovieList() {
-            return movieList;
-        }
-    }
 }

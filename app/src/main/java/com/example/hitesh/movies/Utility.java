@@ -12,6 +12,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.hitesh.movies.api.Movie;
 import com.example.hitesh.movies.data.MovieContract;
 
 /**
