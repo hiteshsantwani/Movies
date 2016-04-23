@@ -29,7 +29,7 @@ import com.example.hitesh.movies.adapters.MovieAdapter;
 
 public class AllMoviesFragment extends Fragment {
     public static final String LOG_TAG = AllMoviesFragment.class.getSimpleName();
-    ArrayList<HashMap<String, String>> movieList;
+
     MovieAdapter movieAdapter;
     GridView moviesGridView;
 
@@ -44,20 +44,18 @@ public class AllMoviesFragment extends Fragment {
 
         moviesGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
 
-        movieList = new ArrayList<>();
-
         // initialize an empty adapter
         movieAdapter = new MovieAdapter(
                 getActivity(),
                 R.layout.movie_poster,
-                new ArrayList<String>());
+                new ArrayList<HashMap<String, String>>());
 
         moviesGridView.setAdapter(movieAdapter);
 
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HashMap<String, String> itemClicked = movieList.get(position);
+                HashMap<String, String> itemClicked = movieAdapter.getItem(position);
                 String movieTitle = itemClicked.get(Constants.Movie.MOVIE_TITLE);
                 String moviePoster = itemClicked.get(Constants.Movie.MOVIE_POSTER);
                 String movieReleaseDate = itemClicked.get(Constants.Movie.MOVIE_RELEASE_DATE);
@@ -72,7 +70,6 @@ public class AllMoviesFragment extends Fragment {
                 detailsIntent.putExtra(Constants.Movie.MOVIE_RATING, movieRating);
                 detailsIntent.putExtra(Constants.Movie.MOVIE_TOTAL_VOTES, movieTotalVotes);
                 detailsIntent.putExtra(Constants.Movie.MOVIE_OVERVIEW, movieOverview);
-
                 startActivity(detailsIntent);
             }
         });
