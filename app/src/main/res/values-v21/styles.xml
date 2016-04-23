@@ -1,8 +1,10 @@
-<resources>>
-            <style name="AppTheme.NoActionBar">
-            <item name="windowActionBar">false</item>
-            <item name="windowNoTitle">true</item>
-            <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-            <item name="android:statusBarColor">@android:color/transparent</item>
-        </style>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- This sets the color of the action bar -->
+        <item name="colorPrimary">@color/green_dark</item>
+
+    </style>
+
 </resources>

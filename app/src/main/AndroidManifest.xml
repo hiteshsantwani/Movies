@@ -4,6 +4,10 @@
 
     <!-- required for fetching data from the cloud service -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- required for syncing with the cloud -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <application
         android:allowBackup="true"
@@ -21,7 +25,7 @@
         </activity>
         <activity
             android:name=".activities.MovieDetailsActivity"
-            android:label="@string/title_activity_details"
+            android:label="@string/activity.details.title"
             android:parentActivityName=".activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -29,7 +33,7 @@
         </activity>
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings"
+            android:label="@string/activity.settings.title"
             android:parentActivityName=".activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -38,7 +42,30 @@
 
         <provider
             android:name=".data.MovieProvider"
-            android:authorities="az.aldoziflaj.popmovies" />
+            android:authorities="com.example.hitesh.movies"
+            android:exported="false"
+            android:syncable="true" />
+
+        <service android:name=".sync.MovieAuthService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <service
+            android:name=".sync.MovieSyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
     </application>
 
 </manifest>

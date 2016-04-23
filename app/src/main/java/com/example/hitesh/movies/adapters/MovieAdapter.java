@@ -4,61 +4,50 @@ package com.example.hitesh.movies.adapters;
  * Created by hitesh on 16-04-2016.
  */
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import  com.example.hitesh.movies.Config;
+import  com.example.hitesh.movies.R;
+import  com.example.hitesh.movies.data.MovieContract;
 
-import com.example.hitesh.movies.Constants;
-import com.example.hitesh.movies.Movie;
-import com.example.hitesh.movies.R;
-
-public class MovieAdapter extends ArrayAdapter<Movie> {
+public class MovieAdapter extends CursorAdapter {
 
     public static final String LOG_TAG = MovieAdapter.class.getSimpleName();
-    private Context mContext;
-    private List<Movie> mPosterUrlList;
-    private int mLayoutResource;
 
-    public MovieAdapter(Context context, int resource, List<Movie> data) {
-        super(context, resource, data);
-        this.mContext = context;
-        this.mLayoutResource = resource;
-        this.mPosterUrlList = data;
+    public MovieAdapter(Context context, Cursor cursor, int flags) {
+        super(context, cursor, flags);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        return LayoutInflater.from(context).inflate(R.layout.movie_poster, parent, false);
+    }
 
-        if (convertView == null) {
-            convertView = inflater.inflate(mLayoutResource, null);
-        }
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        ImageView posterImageView = (ImageView) view.findViewById(R.id.movie_poster);
 
-        ImageView posterImageView = (ImageView) convertView.findViewById(R.id.movie_poster);
+        int moviePosterColumn = cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_IMAGE_URL);
+        String moviePoster = cursor.getString(moviePosterColumn);
 
-        Movie currentMovie = mPosterUrlList.get(position);
-
-        String moviePoster = currentMovie.getPosterPath();
-
-        Uri imageUri = Uri.parse(Constants.Api.IMAGE_BASE_URL).buildUpon()
-                .appendPath(Constants.Api.IMAGE_SIZE_MEDIUM)
+        Uri imageUri = Uri.parse(Config.IMAGE_BASE_URL).buildUpon()
+                .appendPath(context.getString(R.string.api_image_size_medium))
                 .appendPath(moviePoster.substring(1))
                 .build();
 
         Log.d(LOG_TAG + " - Image uri:", imageUri.toString());
 
-        Picasso.with(mContext).load(imageUri)
+        Picasso.with(context).load(imageUri)
                 .placeholder(R.drawable.loading)
                 .into(posterImageView);
-
-        return convertView;
     }
 }

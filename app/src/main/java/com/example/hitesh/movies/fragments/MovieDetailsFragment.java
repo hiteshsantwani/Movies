@@ -1,8 +1,13 @@
 package com.example.hitesh.movies.fragments;
 
+import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,34 +16,69 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import com.example.hitesh.movies.Constants;
+import com.example.hitesh.movies.Config;
 import com.example.hitesh.movies.R;
+import com.example.hitesh.movies.data.MovieContract;
 
 
-public class MovieDetailsFragment extends Fragment {
+public class MovieDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    public static final int DETAILS_LOADER = 0;
 
-    public MovieDetailsFragment() { }
+    public MovieDetailsFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_details, container, false);
+        return inflater.inflate(R.layout.fragment_details, container, false);
+    }
 
-        TextView detailsTitle = (TextView) rootView.findViewById(R.id.details_movie_title);
-        ImageView detailsPoster = (ImageView) rootView.findViewById(R.id.details_movie_poster);
-        TextView detailsRating = (TextView) rootView.findViewById(R.id.movie_rating);
-        TextView detailsReleaseDate = (TextView) rootView.findViewById(R.id.movie_release_date);
-        TextView detailsOverview = (TextView) rootView.findViewById(R.id.movie_description);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(DETAILS_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
 
-        String title = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_TITLE);
-        String poster = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_POSTER);
-        double rating = getActivity().getIntent().getDoubleExtra(Constants.Movie.MOVIE_RATING, 0.0);
-        String releaseDate = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_RELEASE_DATE);
-        int totalVotes = getActivity().getIntent().getIntExtra(Constants.Movie.MOVIE_TOTAL_VOTES, 0);
-        String overview = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_OVERVIEW);
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Intent intent = getActivity().getIntent();
 
-        Uri posterUri = Uri.parse(Constants.Api.IMAGE_BASE_URL).buildUpon()
-                .appendPath(Constants.Api.IMAGE_DEFAULT_SIZE)
+        if (intent == null) {
+            return null;
+        }
+
+        return new CursorLoader(
+                getActivity(),
+                intent.getData(),
+                null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (!cursor.moveToFirst()) {
+            return;
+        }
+
+        if (getView() == null) {
+            //wtf?
+            return;
+        }
+
+        //TextView detailsTitle = (TextView) getView().findViewById(R.id.details_movie_title);
+        ImageView detailsPoster = (ImageView) getView().findViewById(R.id.details_movie_poster);
+        TextView detailsRating = (TextView) getView().findViewById(R.id.movie_rating);
+//        TextView detailsReleaseDate = (TextView) getView().findViewById(R.id.movie_release_date);
+        TextView detailsOverview = (TextView) getView().findViewById(R.id.movie_description);
+
+        String title = cursor.getString(cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_TITLE));
+        String poster = cursor.getString(cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_IMAGE_URL));
+        double rating = cursor.getDouble(cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_VOTE_AVERAGE));
+        String releaseDate = cursor.getString(cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_RELEASE_DATE));
+        int totalVotes = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_VOTE_COUNT));
+        String overview = cursor.getString(cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_DESCRIPTION));
+
+        Uri posterUri = Uri.parse(Config.IMAGE_BASE_URL).buildUpon()
+                .appendPath(getActivity().getString(R.string.api_image_size_default))
                 .appendPath(poster.substring(1)) //remove the heading slash
                 .build();
 
@@ -47,14 +87,13 @@ public class MovieDetailsFragment extends Fragment {
                 .into(detailsPoster);
 
         detailsOverview.setText(overview);
-        detailsTitle.setText(title);
-
+        getActivity().setTitle(title);
         detailsRating.setText(
                 String.format(getActivity().getString(R.string.format_ratings), rating, totalVotes));
+    }
 
-        detailsReleaseDate.setText(
-                String.format(getActivity().getString(R.string.format_release_date), releaseDate));
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
 
-        return rootView;
     }
 }

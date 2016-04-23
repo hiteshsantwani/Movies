@@ -4,10 +4,13 @@ package com.example.hitesh.movies.fragments;
  * Created by hitesh on 16-04-2016.
  */
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,17 +21,16 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import java.util.ArrayList;
-
-import com.example.hitesh.movies.Constants;
-import com.example.hitesh.movies.FetchMoviesTask;
-import com.example.hitesh.movies.Movie;
 import com.example.hitesh.movies.R;
+import com.example.hitesh.movies.Utility;
 import com.example.hitesh.movies.activities.MovieDetailsActivity;
 import com.example.hitesh.movies.adapters.MovieAdapter;
+import com.example.hitesh.movies.data.MovieContract;
+import com.example.hitesh.movies.sync.MovieSyncAdapter;
 
-public class AllMoviesFragment extends Fragment {
+public class AllMoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String LOG_TAG = AllMoviesFragment.class.getSimpleName();
+    public static final int MOVIE_LOADER = 0;
 
     MovieAdapter movieAdapter;
     GridView moviesGridView;
@@ -38,39 +40,34 @@ public class AllMoviesFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         moviesGridView = (GridView) rootView.findViewById(R.id.movies_gridview);
 
-        // initialize an empty adapter
-        movieAdapter = new MovieAdapter(
-                getActivity(),
-                R.layout.movie_poster,
-                new ArrayList<Movie>());
+        movieAdapter = new MovieAdapter(getActivity(), null, 0);
 
         moviesGridView.setAdapter(movieAdapter);
 
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie itemClicked = movieAdapter.getItem(position);
-                String movieTitle = itemClicked.getTitle();
-                String moviePoster = itemClicked.getPosterPath();
-                String movieReleaseDate = itemClicked.getReleaseDate();
-                double movieRating = itemClicked.getRating();
-                int movieTotalVotes = itemClicked.getVoteCount();
-                String movieOverview = itemClicked.getDescription();
+                Cursor currentData = (Cursor) parent.getItemAtPosition(position);
+                if (currentData != null) {
+                    Intent detailsIntent = new Intent(getActivity(), MovieDetailsActivity.class);
+                    final int MOVIE_ID_COL = currentData.getColumnIndex(MovieContract.MovieTable._ID);
+                    Uri movieUri = MovieContract.MovieTable.buildMovieWithId(currentData.getInt(MOVIE_ID_COL));
 
-                Intent detailsIntent = new Intent(getActivity(), MovieDetailsActivity.class);
-                detailsIntent.putExtra(Constants.Movie.MOVIE_TITLE, movieTitle);
-                detailsIntent.putExtra(Constants.Movie.MOVIE_POSTER, moviePoster);
-                detailsIntent.putExtra(Constants.Movie.MOVIE_RELEASE_DATE, movieReleaseDate);
-                detailsIntent.putExtra(Constants.Movie.MOVIE_RATING, movieRating);
-                detailsIntent.putExtra(Constants.Movie.MOVIE_TOTAL_VOTES, movieTotalVotes);
-                detailsIntent.putExtra(Constants.Movie.MOVIE_OVERVIEW, movieOverview);
-                startActivity(detailsIntent);
+                    detailsIntent.setData(movieUri);
+                    startActivity(detailsIntent);
+                }
             }
         });
 
@@ -100,14 +97,41 @@ public class AllMoviesFragment extends Fragment {
     }
 
     private void updateMovies() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = prefs.getString(
-                getString(R.string.movie_sort_key),
-                getString(R.string.movie_sort_default));
+        MovieSyncAdapter.syncImmediately(getActivity());
 
-        Log.d(LOG_TAG, sortOrder);
+    }
 
-        FetchMoviesTask task = new FetchMoviesTask(getActivity(), movieAdapter);
-        task.execute(sortOrder);
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String sortOrderSetting = Utility.getPreferredSortOrder(getActivity());
+        String sortOrder;
+        final int NUMBER_OF_MOVIES = 20;
+
+        if (sortOrderSetting.equals(getString(R.string.prefs_sort_default_value))) {
+            //sort by popularity ? TODO: check if correct
+            sortOrder = MovieContract.MovieTable.COLUMN_VOTE_COUNT + " DESC";
+        } else {
+            //sort by rating
+            sortOrder = MovieContract.MovieTable.COLUMN_VOTE_AVERAGE + " DESC";
+        }
+
+        return new CursorLoader(getActivity(),
+                MovieContract.MovieTable.CONTENT_URI,
+                new String[]{MovieContract.MovieTable._ID, MovieContract.MovieTable.COLUMN_IMAGE_URL},
+                null,
+                null,
+//                sortOrder + " LIMIT " + NUMBER_OF_MOVIES); //TODO: gets the first or the last 20?
+                sortOrder + " LIMIT " + NUMBER_OF_MOVIES);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.d(LOG_TAG, "Cursor loaded, " + cursor.getCount() + " rows fetched");
+        movieAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        movieAdapter.swapCursor(null);
     }
 }

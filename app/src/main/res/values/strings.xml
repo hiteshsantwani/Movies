@@ -1,15 +1,24 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
     <string name="app_name" translatable="false">PopMovies</string>
-    <string name="greetings">Popular Movies</string>
+    <!--<string name="greetings">Popular Movies</string>-->
     <string name="action_settings">Settings</string>
-    <string name="title_activity_details">Details</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="activity.details.title">Details</string>
+    <string name="activity.settings.title">Settings</string>
+
+    <string name="details.button.favorite">Mark as favorite</string>
+
+    <!-- API keys and possible values -->
+    <string name="api.sort.popularity" translatable="false">popularity.desc</string>
+    <string name="api.sort.votes" translatable="false">vote_average.desc</string>
+
+    <string name="api.image.size.default" translatable="false">w185</string>
+    <string name="api.image.size.medium" translatable="false">w342</string>
 
     <!-- Settings key-value pairs -->
-    <string name="movie_sort_key">sorting_type</string>
-    <string name="movie_sort_title">Sort movies by</string>
-    <string name="movie_sort_default">popularity</string>
-    <string-array name="movie_sorting_keys">
+    <string name="prefs.sort.key" translatable="false">sorting_type</string>
+    <string name="prefs.sort.title">Sort movies by</string>
+    <string name="prefs.sort.default_value">popularity</string>
+    <string-array name="movie_sorting_keys" translatable="false">
         <item>popularity</item>
         <item>high_rated</item>
     </string-array>
@@ -18,8 +27,23 @@
         <item>Highest rated</item>
     </string-array>
 
-    <!-- String formats for detailed view -->
-    <string name="format_ratings"><xliff:g id="rating">%.1f</xliff:g>/10 (<xliff:g id="votes">%d</xliff:g> votes)</string>
-    <string name="format_release_date">Released on <xliff:g id="date">%s</xliff:g></string>
+    <string name="prefs.notification.key" translatable="false">notification</string>
+    <string name="prefs.notification.title">Notifications</string>
+    <string name="prefs.notification.summary.off">Don\'t show notifications</string>
+    <string name="prefs.notification.summary.on">Show notifications</string>
+    <string name="prefs.notification.last.key">last_notification</string>
 
+    <!-- String formats for detailed view -->
+    <string name="format.ratings"><xliff:g id="rating">%.1f</xliff:g>/10 (<xliff:g id="votes">%d</xliff:g> votes)</string>
+    <string name="format.release_date">Released on <xliff:g id="date">%s</xliff:g></string>
+
+    <!-- Strings for Syncing -->
+    <string name="sync.account.type">popmovies.example.com</string>
+
+    <!-- Strings for the content provider -->
+    <string name="content.authority">com.example.hitesh.movies</string>
+
+    <string name="notification.content">Did you check the new movies today?</string>
+
+    <string name="menu.favorites">Favorites</string>
 </resources>

@@ -14,7 +14,7 @@ public class Movie {
     private String mTitle;
 
     @SerializedName("id")
-    private int mID;
+    private int mMovieId;
 
     @SerializedName("release_date")
     private String mReleaseDate;
@@ -35,8 +35,8 @@ public class Movie {
         return mTitle;
     }
 
-    public int getID() {
-        return mID;
+    public int getMovieId() {
+        return mMovieId;
     }
 
     public String getReleaseDate() {

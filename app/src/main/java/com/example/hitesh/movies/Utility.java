@@ -5,15 +5,12 @@ package com.example.hitesh.movies;
  */
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
+import java.util.List;
 
 import com.example.hitesh.movies.data.MovieContract;
 
@@ -42,103 +39,71 @@ public class Utility {
     }
 
     /**
-     * The method fetches the list of poster URLs from the JSON response from the cloud
+     * Get the default sort order as shared preference.
      *
-     * @param moviesJsonString The string-encoded JSON response
-     * @return A String array of poster URLs
+     * @param context The application context
+     * @return The default sort order
      */
-    public static String[] fetchPosterListFromJson(String moviesJsonString) {
-        ArrayList<String> posterList = new ArrayList<>();
-        try {
-            JSONArray jsonMovieList = (new JSONObject(moviesJsonString)).getJSONArray("results");
-            int movieListLength = jsonMovieList.length();
-            Log.d(LOG, movieListLength + " items fetched");
+    public static String getPreferredSortOrder(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-            for (int i = 0; i < movieListLength; i++) {
-                JSONObject currentMovie = jsonMovieList.getJSONObject(i);
-                posterList.add(currentMovie.getString(Constants.Api.POSTER_PATH_KEY));
-            }
-
-        } catch (JSONException e) {
-            Log.e(LOG, "Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        String[] result = new String[posterList.size()];
-        posterList.toArray(result);
-
-        return result;
+        return prefs.getString(
+                context.getString(R.string.prefs_sort_key),
+                context.getString(R.string.prefs_sort_default_value));
     }
 
     /**
-     * This method fetches an {@code ArrayList<HashMap<String, String>>} with key-value
-     * pairs of data from the JSON response of the cloud service of TMDB and stores them into the
-     * database
+     * Store a list of {@code Movie} instances into the database
      *
-     * @param context    The Application Context
-     * @param jsonString The string-encoded JSON response
-     * @return The {@code ArrayList<HashMap<String, String>>} with key-value pairs
+     * @param context   The Application Context
+     * @param movieList The {@code Movie} list fetched from the Cloud Service
      */
-    public static ArrayList<Movie> fetchMovieListFromJSON(Context context, String jsonString) {
-        ArrayList<Movie> movieList = new ArrayList<>();
+    public static void storeMovieList(Context context, List<Movie> movieList) {
         ArrayList<ContentValues> cvList = new ArrayList<>();
+        int movieListLength = movieList.size();
+        Log.d(LOG, movieListLength + " items fetched");
 
-        try {
-            JSONArray jsonMovieList = (new JSONObject(jsonString)).getJSONArray("results");
-            int movieListLength = jsonMovieList.length();
-            Log.d(LOG, movieListLength + " items fetched");
+        for (int i = 0; i < movieListLength; i++) {
+            Movie movie = movieList.get(i);
+            ContentValues cValues = new ContentValues();
 
-            for (int i = 0; i < movieListLength; i++) {
-                JSONObject currentJsonMovie = jsonMovieList.getJSONObject(i);
-                ContentValues cValues = new ContentValues();
-                Gson gson = new Gson();
-                Movie singleMovie = gson.fromJson(currentJsonMovie.toString(), Movie.class);
+            //get the movie data from the JSON response
+            //get the title
+            String title = movie.getTitle();
+            cValues.put(MovieContract.MovieTable.COLUMN_TITLE, title);
 
-                //get the movie data from the JSON response
-                //get the title
-                String title = currentJsonMovie.getString(Constants.Api.ORIGINAL_TITLE_KEY);
-                cValues.put(MovieContract.MovieTable.COLUMN_TITLE, title);
+            //get the poster url
+            String posterPath = movie.getPosterPath();
+            cValues.put(MovieContract.MovieTable.COLUMN_IMAGE_URL, posterPath);
 
-                //get the poster url
-                String posterPath = currentJsonMovie.getString(Constants.Api.POSTER_PATH_KEY);
-                cValues.put(MovieContract.MovieTable.COLUMN_IMAGE_URL, posterPath);
+            //get the rating
+            double voteAverage = movie.getRating();
+            cValues.put(MovieContract.MovieTable.COLUMN_VOTE_AVERAGE, voteAverage);
 
-                //get the rating
-                double voteAverage = currentJsonMovie.getDouble(Constants.Api.VOTE_AVERAGE_KEY);
-                cValues.put(MovieContract.MovieTable.COLUMN_VOTE_AVERAGE, voteAverage);
+            //get the total number of votes
+            int totalVotes = movie.getVoteCount();
+            cValues.put(MovieContract.MovieTable.COLUMN_VOTE_COUNT, totalVotes);
 
-                //get the total number of votes
-                int totalVotes = currentJsonMovie.getInt(Constants.Api.TOTAL_VOTES_KEY);
-                cValues.put(MovieContract.MovieTable.COLUMN_VOTE_COUNT, totalVotes);
+            //get the movie release date
+            String releaseDate = Utility.releaseDateFormatter(movie.getReleaseDate());
+            cValues.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE, releaseDate);
 
-                //get the movie release date
-                String releaseDate = Utility.releaseDateFormatter(currentJsonMovie.getString(Constants.Api.RELEASE_DATE_KEY));
-                cValues.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE, releaseDate);
+            //get the description of the movie
+            String description = movie.getDescription();
+            cValues.put(MovieContract.MovieTable.COLUMN_DESCRIPTION, description);
 
-                //get the description of the movie
-                String description = currentJsonMovie.getString(Constants.Api.OVERVIEW_KEY);
-                cValues.put(MovieContract.MovieTable.COLUMN_DESCRIPTION, description);
-
-                movieList.add(singleMovie);
-                cvList.add(cValues);
-            }
-
-            //insert into the DB
-            ContentValues[] values = new ContentValues[cvList.size()];
-            cvList.toArray(values);
-            int itemsAdded = context.getContentResolver().bulkInsert(MovieContract.MovieTable.CONTENT_URI, values);
-
-            if (itemsAdded != movieListLength) {
-                Log.d(LOG, itemsAdded + "/" + movieListLength + " movies inserted");
-            } else {
-                Log.d(LOG, itemsAdded + " records added into the DB");
-            }
-
-        } catch (JSONException e) {
-            Log.e(LOG, "Error: " + e.getMessage());
-            e.printStackTrace();
+            cvList.add(cValues);
         }
 
-        return movieList;
+        //insert into the DB
+        ContentValues[] values = new ContentValues[cvList.size()];
+        cvList.toArray(values);
+        int itemsAdded = context.getContentResolver().bulkInsert(MovieContract.MovieTable.CONTENT_URI, values);
+
+        if (itemsAdded != movieListLength) {
+            Log.d(LOG, itemsAdded + "/" + movieListLength + " movies inserted");
+        } else {
+            Log.d(LOG, itemsAdded + " records added into the DB");
+        }
     }
 }
