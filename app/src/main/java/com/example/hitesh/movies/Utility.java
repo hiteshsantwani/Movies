@@ -6,6 +6,8 @@ package com.example.hitesh.movies;
 /**
  * A list of utility methods used through the application
  */
+import android.content.ContentValues;
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,6 +16,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.example.hitesh.movies.data.MovieContract;
 
 /**
  * A list of utility methods used through the application
@@ -70,13 +74,16 @@ public class Utility {
 
     /**
      * This method fetches an {@code ArrayList<HashMap<String, String>>} with key-value
-     * pairs of data from the JSON response of the cloud service of TMDB
+     * pairs of data from the JSON response of the cloud service of TMDB and stores them into the
+     * database
      *
+     * @param context    The Application Context
      * @param jsonString The string-encoded JSON response
      * @return The {@code ArrayList<HashMap<String, String>>} with key-value pairs
      */
-    public static ArrayList<HashMap<String, String>> fetchMovieListFromJSON(String jsonString) {
+    public static ArrayList<HashMap<String, String>> fetchMovieListFromJSON(Context context, String jsonString) {
         ArrayList<HashMap<String, String>> kvPair = new ArrayList<>();
+        ArrayList<ContentValues> cvList = new ArrayList<>();
 
         try {
             JSONArray jsonMovieList = (new JSONObject(jsonString)).getJSONArray("results");
@@ -85,31 +92,53 @@ public class Utility {
 
             for (int i = 0; i < movieListLength; i++) {
                 JSONObject currentMovie = jsonMovieList.getJSONObject(i);
-                HashMap<String, String> item = new HashMap<>();
+                HashMap<String, String> kvItem = new HashMap<>();
+                ContentValues cValues = new ContentValues();
 
                 //get the movie data from the JSON response
-                item.put(Constants.Movie.MOVIE_ID,
-                        currentMovie.getString(Constants.Api.ID_KEY));
+                //get the title
+                String title = currentMovie.getString(Constants.Api.ORIGINAL_TITLE_KEY);
+                kvItem.put(Constants.Movie.MOVIE_TITLE, title);
+                cValues.put(MovieContract.MovieTable.COLUMN_TITLE, title);
 
-                item.put(Constants.Movie.MOVIE_TITLE,
-                        currentMovie.getString(Constants.Api.ORIGINAL_TITLE_KEY));
+                //get the poster url
+                String posterPath = currentMovie.getString(Constants.Api.POSTER_PATH_KEY);
+                kvItem.put(Constants.Movie.MOVIE_POSTER, posterPath);
+                cValues.put(MovieContract.MovieTable.COLUMN_IMAGE_URL, posterPath);
 
-                item.put(Constants.Movie.MOVIE_POSTER,
-                        currentMovie.getString(Constants.Api.POSTER_PATH_KEY));
+                //get the rating
+                double voteAverage = currentMovie.getDouble(Constants.Api.VOTE_AVERAGE_KEY);
+                kvItem.put(Constants.Movie.MOVIE_RATING, Double.toString(voteAverage));
+                cValues.put(MovieContract.MovieTable.COLUMN_VOTE_AVERAGE, voteAverage);
 
-                item.put(Constants.Movie.MOVIE_RATING,
-                        currentMovie.getString(Constants.Api.VOTE_AVERAGE_KEY));
+                //get the total number of votes
+                int totalVotes = currentMovie.getInt(Constants.Api.TOTAL_VOTES_KEY);
+                kvItem.put(Constants.Movie.MOVIE_TOTAL_VOTES, Integer.toString(totalVotes));
+                cValues.put(MovieContract.MovieTable.COLUMN_VOTE_COUNT, totalVotes);
 
-                item.put(Constants.Movie.MOVIE_TOTAL_VOTES,
-                        currentMovie.getString(Constants.Api.TOTAL_VOTES_KEY));
+                //get the movie release date
+                String releaseDate = Utility.releaseDateFormatter(currentMovie.getString(Constants.Api.RELEASE_DATE_KEY));
+                kvItem.put(Constants.Movie.MOVIE_RELEASE_DATE, releaseDate);
+                cValues.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE, releaseDate);
 
-                item.put(Constants.Movie.MOVIE_RELEASE_DATE,
-                        Utility.releaseDateFormatter(currentMovie.getString(Constants.Api.RELEASE_DATE_KEY)));
+                //get the description of the movie
+                String description = currentMovie.getString(Constants.Api.OVERVIEW_KEY);
+                kvItem.put(Constants.Movie.MOVIE_OVERVIEW, description);
+                cValues.put(MovieContract.MovieTable.COLUMN_DESCRIPTION, description);
 
-                item.put(Constants.Movie.MOVIE_OVERVIEW,
-                        currentMovie.getString(Constants.Api.OVERVIEW_KEY));
+                kvPair.add(kvItem);
+                cvList.add(cValues);
+            }
 
-                kvPair.add(item);
+            //insert into the DB
+            ContentValues[] values = new ContentValues[cvList.size()];
+            cvList.toArray(values);
+            int itemsAdded = context.getContentResolver().bulkInsert(MovieContract.MovieTable.CONTENT_URI, values);
+
+            if (itemsAdded != movieListLength) {
+                Log.d(LOG, itemsAdded + "/" + movieListLength + " movies inserted");
+            } else {
+                Log.d(LOG, itemsAdded + " records added into the DB");
             }
 
         } catch (JSONException e) {
