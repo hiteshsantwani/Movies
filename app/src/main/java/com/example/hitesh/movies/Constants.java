@@ -9,7 +9,7 @@ public final class Constants {
      * Key strings for building URIs to fetch data from the cloud service
      */
     public class Api {
-        public static final String API_KEY = "6e7da6d84d9ec6215cffd1c3e8924c87";
+        public static final String API_KEY = "5e796a75143fae639f7eb2716670fc0e";
         public static final String API_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
         public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
         public static final String IMAGE_DEFAULT_SIZE = "w185";
@@ -42,6 +42,5 @@ public final class Constants {
         public static final String MOVIE_TOTAL_VOTES = "movie_total_votes";
         public static final String MOVIE_OVERVIEW = "movie_overview";
     }
-
 
 }

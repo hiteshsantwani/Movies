@@ -32,14 +32,14 @@ public class MovieDetailsFragment extends Fragment {
 
         String title = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_TITLE);
         String poster = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_POSTER);
-        double rating = Double.parseDouble(getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_RATING));
+        double rating = getActivity().getIntent().getDoubleExtra(Constants.Movie.MOVIE_RATING, 0.0);
         String releaseDate = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_RELEASE_DATE);
-        int totalVotes = Integer.parseInt(getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_TOTAL_VOTES));
+        int totalVotes = getActivity().getIntent().getIntExtra(Constants.Movie.MOVIE_TOTAL_VOTES, 0);
         String overview = getActivity().getIntent().getStringExtra(Constants.Movie.MOVIE_OVERVIEW);
 
         Uri posterUri = Uri.parse(Constants.Api.IMAGE_BASE_URL).buildUpon()
                 .appendPath(Constants.Api.IMAGE_DEFAULT_SIZE)
-                .appendPath(poster.substring(1))
+                .appendPath(poster.substring(1)) //remove the heading slash
                 .build();
 
         Picasso.with(getActivity()).load(posterUri)

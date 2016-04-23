@@ -17,11 +17,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.example.hitesh.movies.adapters.MovieAdapter;
 
-public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
+public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
     public final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
     Toast errorInConnection;
     ProgressDialog dialog;
@@ -42,7 +41,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<HashMap<S
     }
 
     @Override
-    protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
+    protected ArrayList<Movie> doInBackground(String... params) {
         if (params.length == 0) {
             Log.e(LOG_TAG, "Why is this called without params?!");
             return null;
@@ -114,7 +113,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<HashMap<S
     }
 
     @Override
-    protected void onPostExecute(ArrayList<HashMap<String, String>> movieList) {
+    protected void onPostExecute(ArrayList<Movie> movieList) {
         if (movieList == null) {
             errorInConnection.show();
             return;
@@ -128,7 +127,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<HashMap<S
 
         // Update the movieAdapter
         mAdapter.clear();
-        for (HashMap<String, String> item : movieList) {
+        for (Movie item : movieList) {
             mAdapter.add(item);
         }
     }
