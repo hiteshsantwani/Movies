@@ -1,27 +1,28 @@
 package com.example.hitesh.movies.activities;
 
+/**
+ * Created by hitesh on 30-04-2016.
+ */
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.hitesh.movies.R;
-import com.example.hitesh.movies.sync.MovieSyncAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class FavoritesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        MovieSyncAdapter.initSyncAdapter(getApplicationContext());
+        setContentView(R.layout.activity_favorites);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_favorites, menu);
         return true;
     }
 
@@ -32,12 +33,8 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-        } else if (id == R.id.action_favorites) {
-            startActivity(new Intent(this, FavoritesActivity.class));
-            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 }
-

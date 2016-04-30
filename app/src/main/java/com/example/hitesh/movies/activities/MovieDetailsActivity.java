@@ -11,7 +11,7 @@ import com.example.hitesh.movies.R;
 /**
  * Created by hitesh on 16-04-2016.
  */
-public class MovieDetailsActivity extends AppCompatActivity{
+public class MovieDetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,19 +22,14 @@ public class MovieDetailsActivity extends AppCompatActivity{
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_details, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
@@ -42,5 +37,4 @@ public class MovieDetailsActivity extends AppCompatActivity{
 
         return super.onOptionsItemSelected(item);
     }
-
 }

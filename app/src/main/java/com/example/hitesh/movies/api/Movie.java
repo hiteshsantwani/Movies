@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * This class will be used to get a Java Object from the JSON response by using GSON
+ * TODO: Get Movie popularity (for sorting)
  */
 public class Movie {
 

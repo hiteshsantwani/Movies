@@ -15,7 +15,7 @@ import retrofit.http.Query;
 /**
  * This interface serves as a client for The Movie DB. Retrofit does the job
  */
-import az.aldoziflaj.popmovies.Config;
+import com.example.hitesh.movies.Config;
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;

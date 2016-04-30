@@ -1,20 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="az.aldoziflaj.popmovies.activities.MovieDetailsActivity">
     <item
-        android:id="@+id/action_language2"
-        android:title="language2"
-        android:orderInCategory="3"
-        app:showAsAction="ifRoom"
-        tools:ignore="AppCompatResource" >
-
-    <menu xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:context=".activities.MovieDetailsActivity">
-        <item android:id="@+id/action_settings" android:title="@string/action_settings"
-            android:orderInCategory="100" app:showAsAction="never" />
-    </menu>
-    </item>
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/menu.settings"
+        app:showAsAction="never" />
 </menu>

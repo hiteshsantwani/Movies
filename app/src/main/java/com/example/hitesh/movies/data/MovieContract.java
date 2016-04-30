@@ -11,7 +11,7 @@ import android.provider.BaseColumns;
 public class MovieContract {
 
     // Content Authority => The name of the Content Provider
-    public static final String CONTENT_AUTHORITY = "az.aldoziflaj.popmovies";
+    public static final String CONTENT_AUTHORITY = "com.example.hitesh.movies";
 
     // Base content URI to access the data from the Content Provider
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);

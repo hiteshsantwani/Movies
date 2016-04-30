@@ -126,7 +126,7 @@ public class AllMoviesFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.d(LOG_TAG, "Cursor loaded, " + cursor.getCount() + " rows fetched");
+     //   Log.d(LOG_TAG, "Cursor loaded, " + cursor.getCount() + " rows fetched");
         movieAdapter.swapCursor(cursor);
     }
 
