@@ -9,10 +9,10 @@
     <color name="gray_light">#DBDBDB</color>
     <color name="gray">#939393</color>
     <color name="gray_dark">#5F5F5F</color>
-    <color name="green_darker">#1A9158</color>
     <color name="black">#323232</color>
 
     <color name="green_light">#6F6</color>
-        <color name="green_dark">#28B973</color>
+    <color name="green_dark">#28B973</color>
+    <color name="green_darker">#1A9158</color>
 
 </resources>

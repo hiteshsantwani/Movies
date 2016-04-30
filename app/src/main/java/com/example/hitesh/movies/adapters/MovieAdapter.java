@@ -15,9 +15,9 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import  com.example.hitesh.movies.Config;
-import  com.example.hitesh.movies.R;
-import  com.example.hitesh.movies.data.MovieContract;
+import com.example.hitesh.movies.Config;
+import com.example.hitesh.movies.R;
+import com.example.hitesh.movies.data.MovieContract;
 
 public class MovieAdapter extends CursorAdapter {
 
@@ -36,7 +36,7 @@ public class MovieAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ImageView posterImageView = (ImageView) view.findViewById(R.id.movie_poster);
 
-        int moviePosterColumn = cursor.getColumnIndex(MovieContract.MovieTable.COLUMN_IMAGE_URL);
+        int moviePosterColumn = cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_IMAGE_URL);
         String moviePoster = cursor.getString(moviePosterColumn);
 
         Uri imageUri = Uri.parse(Config.IMAGE_BASE_URL).buildUpon()

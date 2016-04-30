@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="SettingsTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ActionBar.V14.NoTitle</item>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <!-- This sets the color of the action bar -->
+        <item name="colorPrimary">@color/green_dark</item>
+        <item name="colorPrimaryDark">@color/green_darker</item>
     </style>
 
-    <!-- Settings activity action bar styles -->
-    <style name="ActionBar.V14.NoTitle" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/green_dark</item>
-        <item name="android:height">56dp</item>
+    <style name="SettingsTheme" parent="AppTheme">
+        <!-- Add the action bar to the Settings screen -->
     </style>
+
 </resources>

@@ -1,13 +1,17 @@
 package com.example.hitesh.movies.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.hitesh.movies.R;
+import com.example.hitesh.movies.Utility;
 import com.example.hitesh.movies.sync.MovieSyncAdapter;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,7 +19,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MovieSyncAdapter.initSyncAdapter(getApplicationContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String lastNotificationKey = getString(R.string.prefs_notification_last_key);
+        long lastSyncTime = prefs.getLong(lastNotificationKey, 0L);
+        if (Utility.isOneDayLater(lastSyncTime)) {
+            MovieSyncAdapter.initSyncAdapter(getApplicationContext());
+        }
     }
 
 
@@ -40,4 +49,3 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
-

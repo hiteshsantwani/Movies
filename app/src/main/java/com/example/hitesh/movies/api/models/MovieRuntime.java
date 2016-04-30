@@ -1,4 +1,4 @@
-package com.example.hitesh.movies.api;
+package com.example.hitesh.movies.api.models;
 
 /**
  * Created by hitesh on 23-04-2016.

@@ -11,6 +11,14 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.test.AndroidTestCase;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+
 import com.example.hitesh.movies.data.MovieContract;
 
 /**
@@ -19,6 +27,8 @@ import com.example.hitesh.movies.data.MovieContract;
 public class TestUtils extends AndroidTestCase {
     public static final String MOVIE_TITLE = "Interstellar";
     public static final int MOVIE_VOTE_COUNT = 1234;
+    private static final double MOVIE_POPULARITY = 12.3;
+    private static final int MOVIE_RUNTIME = 139;
 
     /**
      * Create a stub movie to test insertion into the DB
@@ -28,15 +38,17 @@ public class TestUtils extends AndroidTestCase {
     public static ContentValues createStubMovie() {
         ContentValues cv = new ContentValues();
 
-        cv.put(MovieContract.MovieTable.COLUMN_TITLE, MOVIE_TITLE);
+        cv.put(MovieContract.MovieEntry.COLUMN_TITLE, MOVIE_TITLE);
 
-        cv.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE,
+        cv.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
                 Utility.releaseDateFormatter("2014-10-26"));
 
-        cv.put(MovieContract.MovieTable.COLUMN_VOTE_AVERAGE, 8.8);
-        cv.put(MovieContract.MovieTable.COLUMN_VOTE_COUNT, MOVIE_VOTE_COUNT);
-        cv.put(MovieContract.MovieTable.COLUMN_DESCRIPTION, "lorem ipsum dolor");
-        cv.put(MovieContract.MovieTable.COLUMN_IMAGE_URL, "/img_of_interstellar.jpg");
+        cv.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, 8.8);
+        cv.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT, MOVIE_VOTE_COUNT);
+        cv.put(MovieContract.MovieEntry.COLUMN_DESCRIPTION, "lorem ipsum dolor");
+        cv.put(MovieContract.MovieEntry.COLUMN_IMAGE_URL, "/img_of_interstellar.jpg");
+        cv.put(MovieContract.MovieEntry.COLUMN_POPULARITY, MOVIE_POPULARITY);
+        cv.put(MovieContract.MovieEntry.COLUMN_RUNTIME, MOVIE_RUNTIME);
 
         return cv;
     }
@@ -59,7 +71,7 @@ public class TestUtils extends AndroidTestCase {
             String expectedValue = entry.getValue().toString();
             String value = cursor.getString(idx);
 
-            assertEquals("Value read doesn't match the expected value" + errorMessage, expectedValue, value);
+            assertEquals(errorMessage + ": Value " + colName + " read doesn't match the expected value. ", expectedValue, value);
         }
 
     }
@@ -75,13 +87,15 @@ public class TestUtils extends AndroidTestCase {
         for (int i = 0; i < 3; i++) {
             ContentValues cv = new ContentValues();
 
-            cv.put(MovieContract.MovieTable.COLUMN_TITLE, MOVIE_TITLE + i);
-            cv.put(MovieContract.MovieTable.COLUMN_RELEASE_DATE,
+            cv.put(MovieContract.MovieEntry.COLUMN_TITLE, MOVIE_TITLE + i);
+            cv.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
                     Utility.releaseDateFormatter("2014-10-26"));
-            cv.put(MovieContract.MovieTable.COLUMN_VOTE_AVERAGE, 6.8 + i);
-            cv.put(MovieContract.MovieTable.COLUMN_VOTE_COUNT, MOVIE_VOTE_COUNT + i * 10);
-            cv.put(MovieContract.MovieTable.COLUMN_DESCRIPTION, "lorem ipsum dolor");
-            cv.put(MovieContract.MovieTable.COLUMN_IMAGE_URL, "/img_of_interstellar.jpg");
+            cv.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, 6.8 + i);
+            cv.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT, MOVIE_VOTE_COUNT + i * 10);
+            cv.put(MovieContract.MovieEntry.COLUMN_DESCRIPTION, "lorem ipsum dolor");
+            cv.put(MovieContract.MovieEntry.COLUMN_IMAGE_URL, "/img_of_interstellar.jpg");
+            cv.put(MovieContract.MovieEntry.COLUMN_POPULARITY, MOVIE_POPULARITY + i);
+            cv.put(MovieContract.MovieEntry.COLUMN_RUNTIME, MOVIE_RUNTIME + i * 12);
 
             contentValues.add(cv);
         }

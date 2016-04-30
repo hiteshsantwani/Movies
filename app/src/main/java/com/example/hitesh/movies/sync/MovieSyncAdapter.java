@@ -22,12 +22,17 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import java.util.List;
+
 import com.example.hitesh.movies.Config;
 import com.example.hitesh.movies.R;
-import com.example.hitesh.movies.api.TmdbService;
 import com.example.hitesh.movies.Utility;
 import com.example.hitesh.movies.activities.MainActivity;
-import com.example.hitesh.movies.api.AllMoviesResponse;
+import com.example.hitesh.movies.api.TmdbService;
+import com.example.hitesh.movies.api.models.AllComments;
+import com.example.hitesh.movies.api.models.AllMovies;
+import com.example.hitesh.movies.api.models.AllTrailers;
+import com.example.hitesh.movies.api.models.MovieRuntime;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -37,8 +42,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     // time in seconds when to sync
     public static final int SYNC_INTERVAL = 60 * 60 * 10; // 10 hours
-    private static final long ONE_DAY = 1000 * 60 * 60 * 24;
     private static final int MOVIE_NOTIFICATION_ID = 1001;
+    private static long lastSyncTime = 0L;
 
     public MovieSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -88,25 +93,143 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        String sortOrder = Utility.getPreferredSortOrder(getContext());
+        if (Utility.isOneDayLater(lastSyncTime)) {
+            String sortOrder = Utility.getPreferredSortOrder(getContext());
 
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(Config.API_BASE_URL)
-                .build();
-        TmdbService tmdbService = restAdapter.create(TmdbService.class);
-        tmdbService.getTopMovies(sortOrder, new Callback<AllMoviesResponse>() {
-            @Override
-            public void success(AllMoviesResponse allMovies, Response response) {
-                Utility.storeMovieList(getContext(), allMovies.getMovieList());
-                sendNotification();
-            }
+            RestAdapter restAdapter = new RestAdapter.Builder()
+                    .setEndpoint(Config.API_BASE_URL)
+                    .build();
+            final TmdbService tmdbService = restAdapter.create(TmdbService.class);
 
-            @Override
-            public void failure(RetrofitError error) {
-                Log.e("SyncAdapter", "Error: " + error);
-            }
-        });
+            //get list of movies
+            tmdbService.getTopMovies(sortOrder, new Callback<AllMovies>() {
+                @Override
+                public void success(AllMovies allMovies, Response response) {
+                    List<AllMovies.MovieModel> movieList = allMovies.getMovieList();
 
+                    // store all movies in the DB
+                    Utility.storeMovieList(getContext(), movieList);
+
+                    for (final AllMovies.MovieModel movie : movieList) {
+                        tmdbService.getMovieRuntime(movie.getMovieId(), new Callback<MovieRuntime>() {
+                            @Override
+                            public void success(MovieRuntime movieRuntime, Response response) {
+                                int runtime = movieRuntime.getRuntime();
+                                Utility.updateMovieWithRuntime(getContext(), movie.getMovieId(), runtime);
+
+                            /*
+                            // This is just for testing
+                            Cursor c = getContext().getContentResolver().query(
+                                    MovieContract.MovieEntry.CONTENT_URI,
+                                    new String[]{MovieContract.MovieEntry._ID,
+                                            MovieContract.MovieEntry.COLUMN_RUNTIME},
+                                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + "= ?",
+                                    new String[]{Integer.toString(movie.getMovieId())},
+                                    null
+                            );
+                            if (c.moveToFirst()) {
+                                int runtimeColIndex = c.getColumnIndex(MovieContract.MovieEntry.COLUMN_RUNTIME);
+                                int readRuntime = c.getInt(runtimeColIndex);
+                                Log.d("Movie - Get Runtime",
+                                        String.format("'%s' runs for %d minutes",
+                                                movie.getTitle(), readRuntime));
+                            } else {
+                                Log.e("Movie - Get Runtime", "Not read!");
+                            }
+                            c.close();
+                            //*/
+                            }
+
+                            @Override
+                            public void failure(RetrofitError error) {
+                                Log.e("SyncAdapter", "Error: " + error);
+                            }
+                        });
+
+                        tmdbService.getMovieReviews(movie.getMovieId(), new Callback<AllComments>() {
+                            @Override
+                            public void success(AllComments allComments, Response response) {
+                                List<AllComments.Comment> commentList = allComments.getCommentList();
+
+                                Utility.storeCommentList(getContext(), movie.getMovieId(), commentList);
+                            /*
+                            // This is just for testing
+                            Cursor c = getContext().getContentResolver().query(
+                                    MovieContract.ReviewEntry.CONTENT_URI,
+                                    new String[]{MovieContract.ReviewEntry._ID,
+                                            MovieContract.ReviewEntry.COLUMN_AUTHOR,
+                                            MovieContract.ReviewEntry.COLUMN_CONTENT},
+                                    MovieContract.ReviewEntry.COLUMN_MOVIE_ID + "= ?",
+                                    new String[]{Integer.toString(movie.getMovieId())},
+                                    null
+                            );
+                            if (c.moveToFirst()) {
+                                do {
+                                    int authorColIndex = c.getColumnIndex(MovieContract.ReviewEntry.COLUMN_AUTHOR);
+                                    int contentColIndex = c.getColumnIndex(MovieContract.ReviewEntry.COLUMN_CONTENT);
+                                    Log.d("Movie - Get Comments",
+                                            String.format("%s says: %s",
+                                                    c.getString(authorColIndex),
+                                                    c.getString(contentColIndex)));
+                                } while (c.moveToNext());
+                            } else {
+                                Log.d("Movie - Get Comments", "No comments");
+                            }
+                            c.close();
+                            //*/
+                            }
+
+                            @Override
+                            public void failure(RetrofitError error) {
+                                Log.e("SyncAdapter", "Error: " + error);
+                            }
+                        });
+
+                        tmdbService.getMovieTrailers(movie.getMovieId(), new Callback<AllTrailers>() {
+                            @Override
+                            public void success(AllTrailers allTrailers, Response response) {
+                                Utility.storeTrailerList(getContext(), movie.getMovieId(), allTrailers.getTrailerList());
+                            /*
+                            // This is just for testing
+                            Cursor c = getContext().getContentResolver().query(
+                                    MovieContract.TrailerEntry.CONTENT_URI,
+                                    new String[]{MovieContract.TrailerEntry._ID,
+                                            MovieContract.TrailerEntry.COLUMN_YOUTUBE_KEY},
+                                    MovieContract.TrailerEntry.COLUMN_MOVIE_ID + "= ?",
+                                    new String[]{Integer.toString(movie.getMovieId())},
+                                    null
+                            );
+                            if (c.moveToFirst()) {
+                                do {
+                                    int youtubeKeyColIndex = c.getColumnIndex(MovieContract.TrailerEntry.COLUMN_YOUTUBE_KEY);
+                                    String youtubeKey = c.getString(youtubeKeyColIndex);
+                                    Log.d("Movie - Get Trailers",
+                                            String.format("%s has this key trailer: %s",
+                                                    movie.getTitle(), youtubeKey));
+                                } while (c.moveToNext());
+                            } else {
+                                Log.e("Movie - Get Trailers", "Not read!");
+                            }
+                            c.close();
+                            //*/
+                            }
+
+                            @Override
+                            public void failure(RetrofitError error) {
+                                Log.e("SyncAdapter", "Error: " + error);
+                            }
+                        });
+                    }
+
+                    sendNotification();
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    Log.e("SyncAdapter", "Error: " + error);
+                }
+            });
+        }
     }
 
     private void sendNotification() {
@@ -118,9 +241,9 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         String lastNotificationKey = getContext().getString(R.string.prefs_notification_last_key);
-        long lastSyncTime = prefs.getLong(lastNotificationKey, 0);
+        lastSyncTime = prefs.getLong(lastNotificationKey, 0);
 
-        if (System.currentTimeMillis() - lastSyncTime >= ONE_DAY) {
+        if (Utility.isOneDayLater(lastSyncTime)) {
             //Show notification
 
             int smallIcon = R.mipmap.ic_launcher;
